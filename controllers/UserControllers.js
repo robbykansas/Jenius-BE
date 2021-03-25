@@ -7,19 +7,38 @@ class UserControllers{
   static async login(req, res, next) {
     try {
       const emailAddress = req.body.emailAddress
+      // const user = await User.find({emailAddress})
       const user = await User.findOne({emailAddress})
-      let obj = {
-        id: user._id,
-        accountNumber: user.accountNumber,
-        emailAddress: user.emailAddress,
-        identityNumber: user.identityNumber
-      }
       if (user) {
+        // let obj = {}
+        // if (user.length > 1) {
+          // obj = {
+          //   id: [],
+          //   accountNumber: [],
+          //   emailAddress: user[0].emailAddress,
+          //   identityNumber: []
+          // }
+          // user.forEach(data => {obj.id.push(data._id); obj.accountNumber.push(data.accountNumber); obj.identityNumber.push(data.identityNumber)})
+        // } else {
+          // obj = {
+          //   id: user._id,
+          //   accountNumber: user.accountNumber,
+          //   emailAddress: user.emailAddress,
+          //   identityNumber: user.identityNumber
+          // }
+        // }
+        // console.log(obj)
+        let obj = {
+          id: user._id,
+          accountNumber: user.accountNumber,
+          emailAddress: user.emailAddress,
+          identityNumber: user.identityNumber
+        }
         res.status(200).json({ access_token: createToken(obj)})
       } else {
         throw {
           status: 401,
-          message: 'Invalid email/password'
+          message: 'Invalid email'
         }
       }
     } catch (e) {
@@ -44,6 +63,7 @@ class UserControllers{
 
   static async getLoggedIn(req, res, next) {
     try {
+      // const user = await User.find({emailAddress: req.loggedInUser.emailAddress})
       const user = await User.findOne({_id: req.loggedInUser.id})
       res.status(200).json(user)
     } catch (e) {
@@ -78,7 +98,12 @@ class UserControllers{
         identityNumber: req.body.identityNumber
       })
       await user.save()
-      redis.del('users')
+      // redis.del('users')
+      const pipeline = redis.pipeline()
+      pipeline.del('users')
+      const users = await User.find()
+      pipeline.set('users', JSON.stringify(users))
+      pipeline.exec()
       res.status(201).json(user)
     } catch (e) {
       next (e)
@@ -95,7 +120,12 @@ class UserControllers{
         identityNumber: req.body.identityNumber
       }
       const updateUser = await User.findOneAndUpdate({accountNumber}, obj, {returnOriginal: false})
-      redis.del('users')
+      // redis.del('users')
+      const pipeline = redis.pipeline()
+      pipeline.del('users')
+      const users = await User.find()
+      pipeline.set('users', JSON.stringify(users))
+      pipeline.exec()
       res.status(200).json(updateUser)
     } catch (e) {
       next (e)
@@ -105,7 +135,12 @@ class UserControllers{
   static async deleteUser(req, res, next) {
     try {
       await User.findOneAndDelete({accountNumber: req.params.accountNumber})
-      redis.del('users')
+      // redis.del('users')
+      const pipeline = redis.pipeline()
+      pipeline.del('users')
+      const users = await User.find()
+      pipeline.set('users', JSON.stringify(users))
+      pipeline.exec()
       res.status(200).json('data deleted')
     } catch (e) {
       next (e)

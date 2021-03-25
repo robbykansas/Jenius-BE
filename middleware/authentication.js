@@ -12,6 +12,7 @@ module.exports = async(req, res, next) => {
     } else {
       const decoded = verifyToken(token)
       req.loggedInUser = decoded
+      // const user = await User.find({emailAddress: decoded.emailAddress})
       const user = await User.findOne({_id: decoded.id})
       if (user) {
         next()
