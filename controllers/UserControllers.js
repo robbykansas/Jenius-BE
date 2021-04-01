@@ -1,7 +1,8 @@
 const User = require('../models/User')
 const Redis = require('ioredis')
-const redis = new Redis()
+const redis = new Redis({host:"redis", port: 6379})
 const { createToken } = require("../helpers/jwt");
+const os = require('os')
 
 class UserControllers{
   static async login(req, res, next) {
@@ -54,6 +55,7 @@ class UserControllers{
       } else {
         const users = await User.find()
         await redis.set('users', JSON.stringify(users))
+        console.log(`running on ` + os.type())
         res.status(200).json(users)
       }
     } catch (e) {
