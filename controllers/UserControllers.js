@@ -35,7 +35,7 @@ class UserControllers{
           emailAddress: user.emailAddress,
           identityNumber: user.identityNumber
         }
-        res.status(200).json({ access_token: createToken(obj)})
+        return res.status(200).json({ access_token: createToken(obj)})
       } else {
         throw {
           status: 401,
@@ -56,7 +56,7 @@ class UserControllers{
         const users = await User.find()
         await redis.set('users', JSON.stringify(users))
         console.log(`running on ` + os.type())
-        res.status(200).json(users)
+        return res.status(200).json(users)
       }
     } catch (e) {
       next (e)
@@ -67,7 +67,7 @@ class UserControllers{
     try {
       // const user = await User.find({emailAddress: req.loggedInUser.emailAddress})
       const user = await User.findOne({_id: req.loggedInUser.id})
-      res.status(200).json(user)
+      return res.status(200).json(user)
     } catch (e) {
       next (e)
     }
@@ -76,7 +76,7 @@ class UserControllers{
   static async findAccount(req, res, next) {
     try {
       const user = await User.findOne({accountNumber: req.params.accountNumber})
-      res.status(200).json(user)
+      return res.status(200).json(user)
     } catch (e) {
       next (e)
     }
@@ -85,7 +85,7 @@ class UserControllers{
   static async findIdentity(req, res, next) {
     try {
       const user = await User.findOne({identityNumber: req.params.identityNumber})
-      res.status(200).json(user)
+      return res.status(200).json(user)
     } catch (e) {
       next (e)
     }
@@ -106,7 +106,7 @@ class UserControllers{
       const users = await User.find()
       pipeline.set('users', JSON.stringify(users))
       pipeline.exec()
-      res.status(201).json(user)
+      return res.status(201).json(user)
     } catch (e) {
       next (e)
     }
@@ -128,7 +128,7 @@ class UserControllers{
       const users = await User.find()
       pipeline.set('users', JSON.stringify(users))
       pipeline.exec()
-      res.status(200).json(updateUser)
+      return res.status(200).json(updateUser)
     } catch (e) {
       next (e)
     }
@@ -143,7 +143,7 @@ class UserControllers{
       const users = await User.find()
       pipeline.set('users', JSON.stringify(users))
       pipeline.exec()
-      res.status(200).json('data deleted')
+      return res.status(200).json('data deleted')
     } catch (e) {
       next (e)
     }
